@@ -1,8 +1,17 @@
 import express from "express";
+import dotenv from "dotenv";
+import cors from "cors";
+import cookieParser from "cookie-parser";
+import { router } from "./routes/Routes.js";
+dotenv.config();
 
-const app = express();
-const port = 5000;
+export const app = express();
+export const port = process.env.PORT || 5000;
 
-app.listen(port, () => {
-  console.log(`Server is listening on http://localhost:${port}`);
-});
+app.use(cors());
+app.use(express.json());
+app.use(cookieParser());
+app.use(router);
+
+// moment js format date
+// moment().format('MMMM Do YYYY, h:mm:ss a');
