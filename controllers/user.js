@@ -1,6 +1,7 @@
 import { User } from "../models/User.js";
 import Joi from "joi";
 import { bcryptPass, bcryptAnswer } from "../utils/Bcrypt.js";
+import { JwtToken } from "../utils/Jwt.js";
 
 export const UserControllers = {
   registerUser: async (req, res) => {
@@ -65,7 +66,96 @@ export const UserControllers = {
       });
     }
   },
-  loginUser: async (req, res) => {},
-  forgetpassword: async (req, res) => {},
-  securityQuestion: async (req, res) => {},
+  loginUser: async (req, res) => {
+    try {
+      // password regex
+      var passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
+      console.log("Login called");
+
+      // user schema for validation purposes
+      const userObjSchema = Joi.object({
+        email: Joi.string().email().required(),
+        password: Joi.string().min(4).max(30).pattern(passwordRegex).required(),
+        confirmPassword: Joi.ref("password"),
+      });
+      // get error if exists
+      const { error } = userObjSchema.validate(req.body);
+      // in case of error return error
+      if (error) {
+        console.log(error.message);
+        if (error.message === `"confirmPassword" must be [ref:password]`) {
+          return res.status(500).json({
+            success: false,
+            error: "Confirm Password is not matched with Password",
+          });
+        }
+        return res.status(500).json({
+          success: false,
+          error,
+        });
+      }
+      // getting inputs from server
+      const { email, password } = req.body;
+      // check if email is existing or not
+      const isUserExist = await User.findOne({ email });
+      console.log(isUserExist);
+      if (!isUserExist) {
+        return res.status(500).json({
+          success: false,
+          error: "Email doesn't exist",
+        });
+      }
+      // check the password is matched or not
+      const isPasswordMatch = await bcryptPass.compareHash(
+        password,
+        isUserExist.password
+      );
+      console.log(isPasswordMatch);
+      if (!isPasswordMatch) {
+        return res.status(500).json({
+          success: false,
+          error: "Password not matched! Please try again",
+        });
+      }
+      const token = await JwtToken.sign(isUserExist._id);
+      const options = {
+        expiry: new Date(Date.now() + 3600000), // 1 hour
+        maxAge: 3600000 * 12 * 30,
+      };
+      res
+        .status(200)
+        .cookie("fiverr-chakraui-blog-cookie", options, token)
+        .json({
+          success: true,
+          message: "User Login Successfull",
+        });
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  },
+  securityQuestion: async (req, res) => {
+    try {
+      const { securityQuestion, securityAnswer } = req.body;
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  },
+  forgetpassword: async (req, res) => {
+    try {
+    } catch (error) {
+      console.log(error.message);
+      res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  },
 };

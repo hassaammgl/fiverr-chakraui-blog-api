@@ -7,5 +7,7 @@ const router = express.Router();
 router.get("/", helloWorld);
 // user routers
 router.post("/register", UserControllers.registerUser);
+router.post("/login", UserControllers.loginUser);
+router.post("/securety-qna", UserControllers.securityQuestion);
 
 export { router };
