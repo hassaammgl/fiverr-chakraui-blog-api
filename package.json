@@ -1,5 +1,5 @@
 {
-  "name": "api",
+  "name": "fiverr-chakraui-blog-api",
   "version": "1.0.0",
   "description": "blog api for fiverr showcases",
   "main": "index.js",
