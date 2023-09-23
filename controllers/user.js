@@ -98,7 +98,6 @@ export const UserControllers = {
       const { email, password } = req.body;
       // check if email is existing or not
       const isUserExist = await User.findOne({ email });
-      console.log(isUserExist);
       if (!isUserExist) {
         return res.status(500).json({
           success: false,
@@ -110,7 +109,6 @@ export const UserControllers = {
         password,
         isUserExist.password
       );
-      console.log(isPasswordMatch);
       if (!isPasswordMatch) {
         return res.status(500).json({
           success: false,
@@ -122,13 +120,10 @@ export const UserControllers = {
         expiry: new Date(Date.now() + 3600000), // 1 hour
         maxAge: 3600000 * 12 * 30,
       };
-      res
-        .status(200)
-        .cookie("fiverr-chakraui-blog-cookie", options, token)
-        .json({
-          success: true,
-          message: "User Login Successfull",
-        });
+      res.status(200).cookie("fiverrChakrauiBlogCookie", token, options).json({
+        success: true,
+        message: "User Login Successfull",
+      });
     } catch (error) {
       console.log(error.message);
       res.status(500).json({
@@ -137,9 +132,28 @@ export const UserControllers = {
       });
     }
   },
+
   securityQuestion: async (req, res) => {
     try {
+      // get id from cookie
+      const { _id } = req.user;
+      // getting security question security answer
       const { securityQuestion, securityAnswer } = req.body;
+      // getting user from db
+      const user = await User.findOne({ _id: _id });
+      //encrypting security question and answer
+      const encryptedQuestion = await bcryptAnswer.hash(securityQuestion);
+      const encryptedAnswer = await bcryptAnswer.hash(securityAnswer);
+      // saving user securityAnswer and securityQuestion to save in db
+      user.securityQuestion = encryptedQuestion;
+      user.securityAnswer = encryptedAnswer;
+      // saving user for db
+      await user.save();
+
+      res.status(200).json({
+        success: true,
+        message: "Security Qna's! saved successfully",
+      });
     } catch (error) {
       console.log(error.message);
       res.status(500).json({
@@ -148,6 +162,7 @@ export const UserControllers = {
       });
     }
   },
+
   forgetpassword: async (req, res) => {
     try {
     } catch (error) {
