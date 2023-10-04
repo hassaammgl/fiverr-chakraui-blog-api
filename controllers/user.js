@@ -165,6 +165,15 @@ export const UserControllers = {
 
   forgetpassword: async (req, res) => {
     try {
+      const { answer, email } = req.body;
+      const user = await User.findOne({ email: email });
+      console.log(user);
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          error: "User not found",
+        });
+      }
     } catch (error) {
       console.log(error.message);
       res.status(500).json({

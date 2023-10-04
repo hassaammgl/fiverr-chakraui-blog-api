@@ -10,6 +10,7 @@ router.get("/", helloWorld);
 // user routers
 router.post("/register", UserControllers.registerUser);
 router.post("/login", UserControllers.loginUser);
-router.post("/securety-qna", auth, UserControllers.securityQuestion);
+router.post("/security-qna", auth, UserControllers.securityQuestion);
+router.post("/forget-pass", UserControllers.forgetpassword);
 
 export { router };
