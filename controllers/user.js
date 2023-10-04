@@ -142,10 +142,9 @@ export const UserControllers = {
       // getting user from db
       const user = await User.findOne({ _id: _id });
       //encrypting security question and answer
-      const encryptedQuestion = await bcryptAnswer.hash(securityQuestion);
       const encryptedAnswer = await bcryptAnswer.hash(securityAnswer);
       // saving user securityAnswer and securityQuestion to save in db
-      user.securityQuestion = encryptedQuestion;
+      user.securityQuestion = securityQuestion;
       user.securityAnswer = encryptedAnswer;
       // saving user for db
       await user.save();
@@ -162,18 +161,52 @@ export const UserControllers = {
       });
     }
   },
-
-  forgetpassword: async (req, res) => {
+  getSecurityQuestion: async (req, res) => {
     try {
-      const { answer, email } = req.body;
+      const { email } = req.body;
       const user = await User.findOne({ email: email });
-      console.log(user);
       if (!user) {
         return res.status(404).json({
           success: false,
           error: "User not found",
         });
       }
+      const securityQuestion = await bcryptAnswer.compareHash();
+    } catch (error) {
+      console.log(error.message);
+      return res.status(500).json({
+        success: false,
+        error: error.message,
+      });
+    }
+  },
+  forgetpassword: async (req, res) => {
+    try {
+      const { answer, email, newPassword } = req.body;
+      const user = await User.findOne({ email: email });
+      if (!user) {
+        return res.status(404).json({
+          success: false,
+          error: "User not found",
+        });
+      }
+      const comparedAnswer = await bcryptAnswer.compareHash(
+        answer,
+        user.securityAnswer
+      );
+      if (!comparedAnswer) {
+        return res.status(404).json({
+          success: false,
+          error: "Answer not matched",
+        });
+      }
+      const hashedPassword = await bcryptAnswer.hash(newPassword);
+      user.password = hashedPassword;
+      await user.save();
+      res.status(200).json({
+        success: true,
+        message: "Password changed successfully",
+      });
     } catch (error) {
       console.log(error.message);
       res.status(500).json({

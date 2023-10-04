@@ -11,6 +11,6 @@ router.get("/", helloWorld);
 router.post("/register", UserControllers.registerUser);
 router.post("/login", UserControllers.loginUser);
 router.post("/security-qna", auth, UserControllers.securityQuestion);
-router.post("/forget-pass", UserControllers.forgetpassword);
+router.put("/forget-pass", UserControllers.forgetpassword);
 
 export { router };
