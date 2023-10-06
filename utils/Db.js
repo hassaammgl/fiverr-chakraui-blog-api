@@ -1,7 +1,7 @@
 import { connect } from "mongoose";
 
 export const DbConnect = async () => {
-  await connect(process.env.MONGO_URI, {
+  await connect(process.env.MONGO_URI_2 || process.env.MONGO_URI_1, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })

@@ -8,9 +8,19 @@ dotenv.config();
 export const app = express();
 export const port = process.env.PORT || 5000;
 
-app.use(cors());
+// middlewares
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    next();
+});
 app.use(express.json());
 app.use(cookieParser());
+app.use(cors({
+    credentials: true
+}));
+
+// routes
 app.use("/api/v1/user", userRoutes);
 
 // moment js format date
