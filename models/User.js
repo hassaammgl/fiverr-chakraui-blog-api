@@ -22,7 +22,7 @@ const userSchema = mongoose.Schema({
     type: String,
   },
   registeredAt: {
-    type: Date,
+    type: String,
     default: moment().format("MMMM Do YYYY, h:mm:ss a"),
   },
 });
