@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import moment from "moment";
 
 const userSchema = mongoose.Schema({
   name: {
@@ -19,6 +20,10 @@ const userSchema = mongoose.Schema({
   },
   securityAnswer: {
     type: String,
+  },
+  registeredAt: {
+    type: Date,
+    default: moment().format("MMMM Do YYYY, h:mm:ss a"),
   },
 });
 
