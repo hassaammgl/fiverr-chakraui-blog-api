@@ -4,5 +4,5 @@ import { DbConnect as connect } from "./utils/Db.js";
 connect();
 
 app.listen(port, () => {
-  console.log(`Server is listening on http://localhost:${port}`);
+  console.log(`Server is listening on http://localhost:${port}/api/v1/`);
 });

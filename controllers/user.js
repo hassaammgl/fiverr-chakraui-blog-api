@@ -1,5 +1,4 @@
 import { User } from "../models/User.js";
-import Joi from "joi";
 import { bcryptPass, bcryptAnswer } from "../utils/Bcrypt.js";
 import { JwtToken } from "../utils/Jwt.js";
 
@@ -7,34 +6,21 @@ export const UserControllers = {
   registerUser: async (req, res) => {
     try {
       // password regex
-      var passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
       console.log("register called");
-
-      // user schema for validation purposes
-      const userObjSchema = Joi.object({
-        name: Joi.string().min(4).max(30).required(),
-        email: Joi.string().email(),
-        password: Joi.string().min(4).max(30).pattern(passwordRegex).required(),
-        confirmPassword: Joi.ref("password"),
-      });
-
-      const { error } = userObjSchema.validate(req.body);
-      // in case of error return error
-      if (error) {
-        console.log(error.message);
-        if (error.message === `"confirmPassword" must be [ref:password]`) {
-          return res.status(500).json({
-            success: false,
-            error: "Confirm Password is not matched with Password",
-          });
-        }
-        return res.status(500).json({
-          success: false,
-          error,
+      // getting user input from client
+      const { name, email, password, confirmPassword } = req.body;
+      if (!name || !email || !password || !confirmPassword) {
+        return res.status(403).json({
+          status: false,
+          error: "Please fill all the fields",
         });
       }
-      // getting user input from client
-      const { name, email, password } = req.body;
+      if (password !== confirmPassword) {
+        return res.status(403).json({
+          success: false,
+          error: "Password and current password do not matched",
+        });
+      }
       // check if user is already exist
       const isExist = await User.findOne({ email: email });
       if (isExist) {
@@ -66,36 +52,26 @@ export const UserControllers = {
       });
     }
   },
+
   loginUser: async (req, res) => {
     try {
       // password regex
-      var passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/;
       console.log("Login called");
 
-      // user schema for validation purposes
-      const userObjSchema = Joi.object({
-        email: Joi.string().email().required(),
-        password: Joi.string().min(4).max(30).pattern(passwordRegex).required(),
-        confirmPassword: Joi.ref("password"),
-      });
-      // get error if exists
-      const { error } = userObjSchema.validate(req.body);
-      // in case of error return error
-      if (error) {
-        console.log(error.message);
-        if (error.message === `"confirmPassword" must be [ref:password]`) {
-          return res.status(500).json({
-            success: false,
-            error: "Confirm Password is not matched with Password",
-          });
-        }
-        return res.status(500).json({
-          success: false,
-          error,
+      // getting user input from client
+      const { email, password, confirmPassword } = req.body;
+      if (!email || !password || !confirmPassword) {
+        return res.status(403).json({
+          status: false,
+          error: "Please fill all the fields",
         });
       }
-      // getting inputs from server
-      const { email, password } = req.body;
+      if (password !== confirmPassword) {
+        return res.status(403).json({
+          success: false,
+          error: "Password and current password do not matched",
+        });
+      }
       // check if email is existing or not
       const isUserExist = await User.findOne({ email });
       if (!isUserExist) {
@@ -161,6 +137,7 @@ export const UserControllers = {
       });
     }
   },
+
   getSecurityQuestion: async (req, res) => {
     try {
       const { email } = req.body;
@@ -172,6 +149,7 @@ export const UserControllers = {
         });
       }
       const securityQuestion = await bcryptAnswer.compareHash();
+      console.log(securityQuestion);
     } catch (error) {
       console.log(error.message);
       return res.status(500).json({
@@ -180,6 +158,7 @@ export const UserControllers = {
       });
     }
   },
+
   forgetpassword: async (req, res) => {
     try {
       const { answer, email, newPassword } = req.body;
