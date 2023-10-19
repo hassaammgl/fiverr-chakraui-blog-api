@@ -30,18 +30,24 @@ const blogSchema = mongoose.Schema({
       ref: "Tag",
     },
   ],
-  likes: [
+  likeByPerson: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
   ],
+  likes: {
+    type: Number,
+  },
   createdAt: {
     type: String,
     default: moment().format("MMMM Do YYYY, h:mm:ss a"),
   },
   updatedAt: {
     type: String,
+  },
+  views: {
+    type: Number,
   },
 });
 

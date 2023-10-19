@@ -4,12 +4,15 @@ import moment from "moment";
 const userSchema = mongoose.Schema({
   name: {
     type: String,
-    required: true,
+    required: [true, "Username Required"],
+  },
+  avatarUrl: {
+    type: String,
   },
   email: {
     type: String,
-    required: true,
-    unique: true,
+    required: [true, "Email Required"],
+    unique: [true, "Email is not unique"],
   },
   password: {
     type: String,

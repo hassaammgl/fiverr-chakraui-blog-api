@@ -77,7 +77,7 @@ export const UserControllers = {
       if (!isUserExist) {
         return res.status(500).json({
           success: false,
-          error: "Email doesn't exist",
+          error: "User doesn't exist",
         });
       }
       // check the password is matched or not
@@ -115,15 +115,25 @@ export const UserControllers = {
       const { _id } = req.user;
       // getting security question security answer
       const { securityQuestion, securityAnswer } = req.body;
-      // getting user from db
-      const user = await User.findOne({ _id: _id });
-      //encrypting security question and answer
-      const encryptedAnswer = await bcryptAnswer.hash(securityAnswer);
-      // saving user securityAnswer and securityQuestion to save in db
-      user.securityQuestion = securityQuestion;
-      user.securityAnswer = encryptedAnswer;
-      // saving user for db
-      await user.save();
+      // checking if security Q/A is existing or not
+      const qna = await User.findOne({ securityQuestion: securityQuestion });
+      if (!qna) {
+        // getting user from db
+        const user = await User.findOne({ _id: _id });
+        //encrypting security question and answer
+        const encryptedAnswer = await bcryptAnswer.hash(securityAnswer);
+        // saving user securityAnswer and securityQuestion to save in db
+        user.securityQuestion = securityQuestion;
+        user.securityAnswer = encryptedAnswer;
+        // saving user for db
+        console.log("::", user);
+        await user.save();
+      } else {
+        return res.status(406).json({
+          success: false,
+          error: "Question is already Exists",
+        });
+      }
 
       res.status(200).json({
         success: true,
