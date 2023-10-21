@@ -1,6 +1,7 @@
 import { User } from "../models/User.js";
 import { bcryptPass, bcryptAnswer } from "../utils/Bcrypt.js";
 import { JwtToken } from "../utils/Jwt.js";
+import { StatusCodes, getReasonPhrase } from "http-status-codes";
 
 export const UserControllers = {
   registerUser: async (req, res) => {
@@ -10,13 +11,13 @@ export const UserControllers = {
       // getting user input from client
       const { name, email, password, confirmPassword } = req.body;
       if (!name || !email || !password || !confirmPassword) {
-        return res.status(403).json({
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
           status: false,
           error: "Please fill all the fields",
         });
       }
       if (password !== confirmPassword) {
-        return res.status(403).json({
+        return res.status(StatusCodes.UNAUTHORIZED).json({
           success: false,
           error: "Password and current password do not matched",
         });
@@ -24,7 +25,7 @@ export const UserControllers = {
       // check if user is already exist
       const isExist = await User.findOne({ email: email });
       if (isExist) {
-        return res.status(500).json({
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
           success: false,
           error: "User already exists",
         });
@@ -40,13 +41,13 @@ export const UserControllers = {
       // save new user to database
       await newUser.save();
       // return response
-      return res.status(201).json({
+      return res.status(StatusCodes.CREATED).json({
         success: true,
         message: "User registered successfully",
       });
     } catch (error) {
       console.log(error.message);
-      res.status(500).json({
+      res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
         success: false,
         error: error.message,
       });

@@ -13,9 +13,10 @@ export const port = process.env.PORT || 5000;
 app.use(
   cors({
     credentials: true,
-    origin: ["*", "http://localhost:5173"],
+    origin: [process.env.ORGIN_URL],
   })
 );
+
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header("Access-Control-Allow-Credentials", "true");
