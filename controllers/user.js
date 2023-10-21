@@ -1,7 +1,7 @@
 import { User } from "../models/User.js";
 import { bcryptPass, bcryptAnswer } from "../utils/Bcrypt.js";
 import { JwtToken } from "../utils/Jwt.js";
-import { StatusCodes, getReasonPhrase } from "http-status-codes";
+import { StatusCodes } from "http-status-codes";
 
 export const UserControllers = {
   registerUser: async (req, res) => {
@@ -62,13 +62,13 @@ export const UserControllers = {
       // getting user input from client
       const { email, password, confirmPassword } = req.body;
       if (!email || !password || !confirmPassword) {
-        return res.status(403).json({
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
           status: false,
           error: "Please fill all the fields",
         });
       }
       if (password !== confirmPassword) {
-        return res.status(403).json({
+        return res.status(StatusCodes.UNAUTHORIZED).json({
           success: false,
           error: "Password and current password do not matched",
         });
@@ -76,7 +76,7 @@ export const UserControllers = {
       // check if email is existing or not
       const isUserExist = await User.findOne({ email });
       if (!isUserExist) {
-        return res.status(500).json({
+        return res.status(StatusCodes.NOT_FOUND).json({
           success: false,
           error: "User doesn't exist",
         });
@@ -87,7 +87,7 @@ export const UserControllers = {
         isUserExist.password
       );
       if (!isPasswordMatch) {
-        return res.status(500).json({
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
           success: false,
           error: "Password not matched! Please try again",
         });
@@ -97,13 +97,16 @@ export const UserControllers = {
         expiry: new Date(Date.now() + 3600000), // 1 hour
         maxAge: 3600000 * 12 * 30,
       };
-      res.status(200).cookie("fiverrChakrauiBlogCookie", token, options).json({
-        success: true,
-        message: "User Login Successfull",
-      });
+      res
+        .status(StatusCodes.OK)
+        .cookie("fiverrChakrauiBlogCookie", token, options)
+        .json({
+          success: true,
+          message: "User Login Successfull",
+        });
     } catch (error) {
       console.log(error.message);
-      res.status(500).json({
+      res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
         success: false,
         error: error.message,
       });
@@ -127,22 +130,21 @@ export const UserControllers = {
         user.securityQuestion = securityQuestion;
         user.securityAnswer = encryptedAnswer;
         // saving user for db
-        console.log("::", user);
         await user.save();
       } else {
-        return res.status(406).json({
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
           success: false,
           error: "Question is already Exists",
         });
       }
 
-      res.status(200).json({
+      res.status(StatusCodes.OK).json({
         success: true,
         message: "Security Qna's! saved successfully",
       });
     } catch (error) {
       console.log(error.message);
-      res.status(500).json({
+      res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
         success: false,
         error: error.message,
       });
@@ -154,7 +156,7 @@ export const UserControllers = {
       const { email } = req.body;
       const user = await User.findOne({ email: email });
       if (!user) {
-        return res.status(404).json({
+        return res.status(StatusCodes.NOT_FOUND).json({
           success: false,
           error: "User not found",
         });
@@ -163,7 +165,7 @@ export const UserControllers = {
       console.log(securityQuestion);
     } catch (error) {
       console.log(error.message);
-      return res.status(500).json({
+      return res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
         success: false,
         error: error.message,
       });
@@ -175,7 +177,7 @@ export const UserControllers = {
       const { answer, email, newPassword } = req.body;
       const user = await User.findOne({ email: email });
       if (!user) {
-        return res.status(404).json({
+        return res.status(StatusCodes.NOT_FOUND).json({
           success: false,
           error: "User not found",
         });
@@ -185,7 +187,7 @@ export const UserControllers = {
         user.securityAnswer
       );
       if (!comparedAnswer) {
-        return res.status(404).json({
+        return res.status(StatusCodes.NOT_ACCEPTABLE).json({
           success: false,
           error: "Answer not matched",
         });
@@ -193,13 +195,13 @@ export const UserControllers = {
       const hashedPassword = await bcryptAnswer.hash(newPassword);
       user.password = hashedPassword;
       await user.save();
-      res.status(200).json({
+      res.status(StatusCodes.OK).json({
         success: true,
         message: "Password changed successfully",
       });
     } catch (error) {
       console.log(error.message);
-      res.status(500).json({
+      res.status(StatusCodes.SERVICE_UNAVAILABLE).json({
         success: false,
         error: error.message,
       });
